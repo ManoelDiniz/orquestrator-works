@@ -30,6 +30,26 @@ Copy-Item -Recurse skills\orquestracao-de-sessoes $HOME\.claude\skills\
 Copy-Item commands\*.md $HOME\.claude\commands\
 ```
 
+## Versão para o Cursor
+
+A pasta `cursor/` traz a mesma skill adaptada ao Cursor: regras (`.mdc`) e comandos.
+
+| Item | Para que serve |
+|---|---|
+| `cursor/rules/orquestracao-de-sessoes.mdc` | O protocolo, sem `SendMessage`/`ListAgents` |
+| `cursor/rules/formato-sessao.mdc` | Formato do `SESSAO.md` e modelos de task e entrega |
+| `cursor/rules/modelos-de-cargo.mdc` | Modelos de cargo |
+| `cursor/commands/equipe.md` | `/equipe`: monta o time |
+| `cursor/commands/comunicar.md` | `/comunicar`: grava a ordem e entrega a mensagem pronta |
+
+Instalação, na raiz do projeto (o Cursor lê `.cursor/` do projeto):
+
+```bash
+mkdir -p .cursor && cp -r cursor/rules cursor/commands .cursor/
+```
+
+Diferença: o Cursor não deixa uma sessão acordar outra. O fluxo de arquivos (`inbox/outbox`, `ESTADO.md`, auditoria) é o mesmo, mas quem leva o aviso de uma sessão à outra é você, colando a mensagem curta que o agente entrega. Cada pasta de sessão ganha um `.cursor/rules/time-de-sessoes.mdc` (criado pelo `/equipe`) para o chat novo ler o `inbox` sozinho.
+
 ## Como usar
 
 1. Na raiz do projeto, rode `/equipe`. Ele sugere as pastas, pergunta o cargo e as regras de cada uma e cria `.time/` com um `SESSAO.md` por pasta.

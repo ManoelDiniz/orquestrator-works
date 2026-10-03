@@ -1,0 +1,87 @@
+---
+description: Coordena várias sessões do Cursor (uma janela ou chat de agente por pasta do projeto), com cargos definidos num SESSAO.md por pasta, canais inbox/outbox e auditoria. Use ao montar um time de sessões, despachar ou aceitar tarefas entre elas, ou quando o usuário falar em "orquestrador", "SESSAO.md", "despachar task", "inbox", "outbox", "chamar a sessão do <cargo>".
+alwaysApply: false
+---
+
+# Orquestração de sessões no Cursor
+
+Várias sessões abertas ao mesmo tempo, **uma por pasta** (uma janela do Cursor aberta na pasta, ou um chat de agente dedicado a ela), cada uma com um **cargo livre** e regras próprias. Uma é o **orquestrador**; as outras são **executoras**. Quem diz o cargo é o `SESSAO.md` da pasta, não o nome do chat.
+
+**Diferença para o Claude Code:** o Cursor não tem `SendMessage` nem `ListAgents`. Uma sessão não consegue acordar outra. Quem acorda é o **dono**: o agente grava a ordem em arquivo e entrega ao dono uma **mensagem pronta** (1 a 3 linhas) para colar no chat da outra sessão. O resto do protocolo é igual.
+
+## 1. Onde as coisas vivem
+
+- **Raiz do time:** suba do diretório atual até a primeira pasta com `.time/`. Lá ficam `.time/ESTADO.md` (diário, dono: orquestrador) e `.time/<cargo>/inbox|fila|outbox|archive`. Sem `.time/`: sugira `/equipe`.
+- **Cargos:** um `SESSAO.md` por pasta de sessão. Formato e modelos de task/entrega: regra `formato-sessao` (leia só quando precisar).
+- **Auditoria:** `.time/AUDITORIA.md`, só de acréscimo (seção 8).
+
+## 2. Papéis
+
+- **Orquestrador:** escreve ordens, aceita entregas, mantém o diário e o contrato entre os projetos, decide prioridade, fala com o dono. Não escreve o código das executoras.
+- **Executora:** uma task por vez, **só dentro da pasta dela**. Não muda contrato sozinha.
+- **Pesquisa/PO** (se houver): lê, pesquisa e devolve achado; **não escreve código nem conserta**.
+
+Executoras **não falam entre si**: tudo passa pelo orquestrador. Problema fora do escopo: **reporta em Pendências, não conserta.**
+
+## 3. Ciclo de uma task
+
+**Só `inbox/` é ordem.** `fila/`, `archive/` e o resto são referência.
+
+1. **Escopo primeiro:** o orquestrador apresenta ao dono o que vai despachar e espera o OK (salvo se o dono delegou).
+2. **Despacho:** grava `<canal>/inbox/NNN-slug.md` e diz ao dono a mensagem curta para colar na sessão do cargo (ex.: "Leia o inbox: tem a task 003."). O arquivo é a ordem; a mensagem só acorda. NNN = maior número em `inbox/` + `archive/` + 1.
+3. **Execução:** uma task por vez. Bloqueio real vai na hora como `STATUS: blocked` ou `needs-info`.
+4. **Entrega:** `<canal>/outbox/NNN-slug.done.md` e, no fim da resposta, a mensagem "NNN done" para o dono colar no orquestrador.
+5. **Aceite:** o orquestrador confere contra a **resposta real**, aplica bump de contrato se a superfície mudou, registra no diário, avisa quem depende (via dono) e **move task, emendas, notas e entrega para `<canal>/archive/`**. No `inbox/` só fica o que está pendente.
+6. **Autodespacho (opcional):** sem pendência, a executora pode puxar o próximo item da própria `fila/`. O que o orquestrador mover pra `inbox/` vale.
+
+## 4. Regras de convivência
+
+- **Contrato manda no código.** Divergiu: ou o código está errado, ou o contrato precisa de bump, que passa pelo orquestrador.
+- **Ninguém muda a fronteira entre projetos sozinho** (API, esquema de mensagem, interface pública): pede bump pelo `outbox/`.
+- **Ninguém edita a pasta do outro.**
+- **Divergência se afirma contra a resposta real,** não contra o código.
+- **Banco de dev compartilhado:** anuncia antes, guarda o id de tudo que criar, apaga **só por esses ids**, confere a contagem antes e depois. Nunca por janela de tempo, nunca em dados reais.
+- **Investigação** ("por que X não funciona", "como o concorrente faz Y") vai para a pesquisa, não para o orquestrador.
+- **Git:** commit e push ao fechar cada task, se o dono autorizou; nunca `-f` em branch principal, nada de segredo.
+
+## 5. Economia de uso
+
+O que mais gasta é **ler arquivo grande** e **conversa longa**.
+
+1. Orquestrador e pesquisa em modelo mais barato; executoras (código e teste) no mais forte.
+2. **Chat novo** a cada reinício ou quando ficar longo: o estado vive no diário, nas pastas e no git.
+3. **Leia só o necessário:** contrato grande é dividido **um arquivo por seção** com um índice; a task cita a seção e a sessão lê só ela. Diário: só as últimas ~5 entradas. Nunca abra `archive/` nem o diário arquivado inteiro; busque (grep) pelo número ou pela data.
+4. **Textos curtos:** task até ~60 linhas, `.done.md` até ~40, entrada de diário até ~10. Cite arquivo, seção ou task anterior em vez de colar. Passando de ~15 entradas no diário, mova as antigas para um arquivo `*-arquivo-*.md`.
+5. **Mensagem para outra sessão:** uma a três linhas; o conteúdo está no arquivo.
+6. Uma task por vez por cargo; PARCIAL + commit WIP antes de parar.
+
+## 6. Ao abrir uma sessão
+
+**Executora:** leia o `SESSAO.md` da própria pasta. Olhe `<canal>/inbox`: arquivo sem `.done.md` no `outbox/` é ordem pendente; execute a mais antiga. Sem pendência, diga isso em uma linha e fique ociosa. Vale na primeira interação, qualquer que seja a mensagem (a regra `time-de-sessoes`, gravada pelo `/equipe` em cada pasta, dispara isso).
+
+**Orquestrador:** leia as regras e as ~5 últimas entradas do diário, confira os `inbox/` e `outbox/` de todos os cargos. Diga ao dono, em poucas linhas, onde estamos e o que falta.
+
+## 7. Chamar uma sessão pelo cargo (`/comunicar`)
+
+1. Descubra os cargos (seção 1). Nunca invente cargo.
+2. Se for tarefa, grave antes `<canal>/inbox/NNN-slug.md`; a mensagem só aponta pra ele.
+3. Entregue ao dono, em bloco de código, a mensagem autossuficiente para colar no chat da sessão daquele cargo. Se a sessão ainda não existe: abra o Cursor na pasta do `SESSAO.md` e cole a mensagem num chat de agente novo.
+4. Nome que casa com mais de um cargo: pergunte qual.
+5. Diga ao dono em uma linha para quem foi e o quê.
+
+**Mensagem entre sessões do time não pede aprovação do dono:** gravar/ler `inbox`/`outbox`, avisar "NNN done" e executar a task do `inbox` acontecem direto. O que o dono já autorizou no protocolo (ex.: commit + push ao fechar a task) vale também quando o pedido chega por outra sessão. Só pare para confirmar o que fugir do protocolo e da task: apagar dado real, `push -f`, mensagem para fora do time.
+
+## 8. Auditoria: quem fala, como fala
+
+Toda comunicação entre sessões deixa **uma linha** em `.time/AUDITORIA.md` (crie com o cabeçalho abaixo se não existir). **Só acrescenta ao fim; nunca edita nem apaga linha.** Quem envia registra, no ato:
+
+```
+| data/hora | de (cargo) | para (cargo) | via | arquivo | resumo |
+```
+
+- **via:** `mensagem` (texto colado pelo dono), `inbox` (despacho), `outbox` (entrega), `bump` (pedido de contrato) ou `dono` (instrução direta do dono à sessão).
+- **arquivo:** `NNN-slug.md` quando houver; senão `-`.
+- **resumo:** até ~10 palavras. Sem segredo, token ou dado real.
+- **de:** o cargo do `SESSAO.md` da sessão que escreve.
+
+Mensagem sem linha na auditoria não vale como ordem. Ao aceitar uma entrega, o orquestrador confere que existem as linhas de despacho e de entrega. Para auditar: `grep` por cargo, número ou data; nunca leia o arquivo inteiro. Passando de ~200 linhas, mova as antigas para `AUDITORIA-arquivo-AAAA-MM.md`.

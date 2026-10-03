@@ -36,4 +36,6 @@ Com cargo e mensagem, siga a seção 7 da skill:
 - **Vários cargos:** repita para cada um, sem misturar as mensagens.
 - **Nome de sessão que não casa com nenhum cargo:** pergunte uma vez qual sessão é o cargo e grave o nome em `palavras` do `SESSAO.md`.
 
+**Auditoria:** para cada mensagem enviada ou ordem gravada, acrescente uma linha em `.time/AUDITORIA.md` (skill, seção 8: data/hora, de, para, via, arquivo, resumo).
+
 Termine com uma linha: para quem foi, aberto ou fechado, e o que foi enviado.

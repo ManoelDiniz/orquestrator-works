@@ -11,6 +11,7 @@ Várias sessões abertas ao mesmo tempo, **uma por pasta**, cada uma com um **ca
 
 - **Raiz do time:** suba do diretório atual até a primeira pasta com `.time/`. Lá ficam `.time/ESTADO.md` (diário, dono: orquestrador) e `.time/<cargo>/inbox|fila|outbox|archive`. Sem `.time/`: sugira `/equipe`.
 - **Cargos:** um `SESSAO.md` por pasta de sessão. Formato, descoberta e modelos de task/entrega: `formato-sessao.md` (leia só quando precisar).
+- **Auditoria:** `.time/AUDITORIA.md`, só de acréscimo (seção 8). Quem falou com quem, por qual canal e o quê.
 - **Layout antigo:** raiz com `ORQUESTRACAO.md` e pastas `<lado>-comunication/`. Os cargos vêm da tabela "Quem é quem" do `ORQUESTRACAO.md` (cargo, pasta, canal, palavras no `ListAgents`), e o diário é o próprio `ORQUESTRACAO.md`. O resto do protocolo é igual.
 
 ## 2. Papéis
@@ -71,3 +72,18 @@ O que mais gasta é **ler arquivo grande** e **conversa longa relida a cada resp
 7. Diga ao usuário em uma linha para quem foi e o quê.
 
 **Mensagem entre sessões do time não pede aprovação do dono.** Mandar e receber `SendMessage`, gravar/ler `inbox`/`outbox`, avisar "NNN done" e executar a task do `inbox` acontecem direto, sem perguntar. O que o dono já autorizou no protocolo (ex.: commit + push ao fechar a task) vale também quando o pedido chega por outra sessão. Só pare para confirmar o que fugir do protocolo e da task: apagar dado real, `push -f`, mensagem para fora do time.
+
+## 8. Auditoria: quem fala, como fala
+
+Toda comunicação entre sessões deixa **uma linha** em `.time/AUDITORIA.md` (crie com o cabeçalho abaixo se não existir; layout antigo: `AUDITORIA.md` na raiz). **Só acrescenta ao fim; nunca edita nem apaga linha.** Quem envia registra, no ato:
+
+```
+| data/hora | de (cargo) | para (cargo) | via | arquivo | resumo |
+```
+
+- **via:** `SendMessage`, `inbox` (despacho), `outbox` (entrega), `bump` (pedido de contrato) ou `dono` (instrução direta do dono à sessão).
+- **arquivo:** `NNN-slug.md` quando houver; senão `-`.
+- **resumo:** até ~10 palavras. Sem segredo, token ou dado real.
+- **de:** o cargo do `SESSAO.md` da sessão que escreve, nunca o nome do `ListAgents`.
+
+Mensagem sem linha na auditoria não vale como ordem. Ao aceitar uma entrega, o orquestrador confere que existem as linhas de despacho e de entrega. Para auditar: `grep` por cargo, número ou data; nunca leia o arquivo inteiro. Passando de ~200 linhas, mova as antigas para `AUDITORIA-arquivo-AAAA-MM.md`.
