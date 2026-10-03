@@ -42,11 +42,23 @@ A pasta `cursor/` traz a mesma skill adaptada ao Cursor: regras (`.mdc`) e coman
 | `cursor/commands/equipe.md` | `/equipe`: monta o time |
 | `cursor/commands/comunicar.md` | `/comunicar`: grava a ordem e entrega a mensagem pronta |
 
-Instalação, na raiz do projeto (o Cursor lê `.cursor/` do projeto):
+Instalação, na raiz do projeto (o Cursor lê `.cursor/` do projeto). O script copia regras e comandos e cria o `.cursorignore` se não existir:
+
+```powershell
+<caminho do repo>\cursor\instalar.ps1
+```
 
 ```bash
-mkdir -p .cursor && cp -r cursor/rules cursor/commands .cursor/
+sh <caminho do repo>/cursor/instalar.sh
 ```
+
+### Reduzir custo no Cursor
+
+- **Regras sob demanda:** só o `time-de-sessoes.mdc` (curto) é `alwaysApply`. O protocolo, o formato, os modelos e a auditoria são lidos só quando preciso (`alwaysApply: false`).
+- **`.cursorignore`:** exclui `node_modules`, `bin`, `obj`, `archive/` e arquivos de arquivo morto da indexação e da leitura (modelo em `cursor/modelos/cursorignore`).
+- **Modelo por cargo:** orquestrador, pesquisa e docs em modelo barato ou `Auto`; executoras de código e teste no modelo forte.
+- **Chat novo** a cada task ou quando o chat ficar longo: o estado vive em `.time/` e no git.
+- **Textos curtos:** task até ~60 linhas, entrega até ~40; a mensagem colada na outra sessão tem 1 a 3 linhas.
 
 Diferença: o Cursor não deixa uma sessão acordar outra. O fluxo de arquivos (`inbox/outbox`, `ESTADO.md`, auditoria) é o mesmo, mas quem leva o aviso de uma sessão à outra é você, colando a mensagem curta que o agente entrega. Cada pasta de sessão ganha um `.cursor/rules/time-de-sessoes.mdc` (criado pelo `/equipe`) para o chat novo ler o `inbox` sozinho.
 
