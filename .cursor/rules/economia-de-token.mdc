@@ -1,0 +1,16 @@
+---
+description: Boas práticas para gastar poucos tokens no Cursor (contexto, leitura, respostas, modelo, chat).
+alwaysApply: true
+---
+
+# Economia de token
+
+- **Leia o mínimo:** busque com grep/glob antes de abrir arquivo; abra só o trecho necessário (faixa de linhas), nunca o arquivo inteiro se for grande. Não releia o que já está no chat.
+- **Contexto enxuto:** use `@arquivo` só no que importa; não anexe pastas inteiras. Respeite o `.cursorignore` e não leia `node_modules`, `bin`, `obj`, `dist`, `archive/`.
+- **Edite pontual:** altere só o trecho pedido; não reescreva arquivo inteiro nem refatore o que não foi pedido.
+- **Responda curto:** direto ao resultado, sem repetir o pedido, sem recapitular o que foi feito, sem listar alternativas que não vai usar. Não cole código que já está no arquivo.
+- **Um passo por vez:** tarefa grande vira etapas pequenas; confirme o rumo antes de gastar muito.
+- **Não rode à toa:** não execute build/teste/comando de saída longa sem necessidade; limite a saída (`| head`, `--quiet`, filtro).
+- **Chat novo por task:** quando o chat ficar longo ou o assunto mudar, abra outro; o estado vive em `.time/` e no git, não na conversa.
+- **Modelo certo:** `Auto` ou modelo barato para ler, pesquisar, documentar e coordenar; modelo forte só para código difícil e depuração.
+- **Regras sob demanda:** regras longas ficam com `alwaysApply: false` e são lidas só quando preciso. Esta regra é a única sempre ativa; mantenha-a curta.

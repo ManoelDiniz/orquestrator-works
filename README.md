@@ -39,8 +39,11 @@ A pasta `cursor/` traz a mesma skill adaptada ao Cursor: regras (`.mdc`) e coman
 | `cursor/rules/orquestracao-de-sessoes.mdc` | O protocolo, sem `SendMessage`/`ListAgents` |
 | `cursor/rules/formato-sessao.mdc` | Formato do `SESSAO.md` e modelos de task e entrega |
 | `cursor/rules/modelos-de-cargo.mdc` | Modelos de cargo |
+| `cursor/rules/economia-de-token.mdc` | Boas práticas de economia de token (sempre ativa, curta) |
 | `cursor/commands/equipe.md` | `/equipe`: monta o time |
 | `cursor/commands/comunicar.md` | `/comunicar`: grava a ordem e entrega a mensagem pronta |
+
+**Importante:** a pasta `cursor/` é a fonte; este repositório também traz um `.cursor/` e um `.cursorignore` prontos, mas o Cursor só lê o `.cursor/` da pasta aberta. Para seus projetos, rode o instalador na raiz de cada um.
 
 Instalação, na raiz do projeto (o Cursor lê `.cursor/` do projeto). O script copia regras e comandos e cria o `.cursorignore` se não existir:
 
@@ -54,7 +57,7 @@ sh <caminho do repo>/cursor/instalar.sh
 
 ### Reduzir custo no Cursor
 
-- **Regras sob demanda:** só o `time-de-sessoes.mdc` (curto) é `alwaysApply`. O protocolo, o formato, os modelos e a auditoria são lidos só quando preciso (`alwaysApply: false`).
+- **Regras sob demanda:** só o `economia-de-token.mdc` e o `time-de-sessoes.mdc` (curtos) são `alwaysApply`. O protocolo, o formato, os modelos e a auditoria são lidos só quando preciso (`alwaysApply: false`).
 - **`.cursorignore`:** exclui `node_modules`, `bin`, `obj`, `archive/` e arquivos de arquivo morto da indexação e da leitura (modelo em `cursor/modelos/cursorignore`).
 - **Modelo por cargo:** orquestrador, pesquisa e docs em modelo barato ou `Auto`; executoras de código e teste no modelo forte.
 - **Chat novo** a cada task ou quando o chat ficar longo: o estado vive em `.time/` e no git.
