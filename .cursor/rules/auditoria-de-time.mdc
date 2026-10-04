@@ -1,0 +1,19 @@
+---
+description: Formato da auditoria do time (.time/AUDITORIA.md): linha por mensagem entre sessões. Leia só ao registrar ou conferir uma comunicação.
+alwaysApply: false
+---
+
+# Auditoria: quem fala, como fala
+
+Toda comunicação entre sessões deixa **uma linha** em `.time/AUDITORIA.md` (crie com o cabeçalho abaixo se não existir). **Só acrescenta ao fim; nunca edita nem apaga linha.** Quem envia registra, no ato:
+
+```
+| data/hora | de (cargo) | para (cargo) | via | arquivo | resumo |
+```
+
+- **via:** `mensagem` (texto colado pelo dono), `inbox` (despacho), `outbox` (entrega), `bump` (pedido de contrato) ou `dono` (instrução direta do dono à sessão).
+- **arquivo:** `NNN-slug.md` quando houver; senão `-`.
+- **resumo:** até ~10 palavras. Sem segredo, token ou dado real.
+- **de:** o cargo do `SESSAO.md` da sessão que escreve.
+
+Mensagem sem linha na auditoria não vale como ordem. Ao aceitar uma entrega, o orquestrador confere que existem as linhas de despacho e de entrega. Para auditar: `grep` por cargo, número ou data; nunca leia o arquivo inteiro. Passando de ~200 linhas, mova as antigas para `AUDITORIA-arquivo-AAAA-MM.md`.

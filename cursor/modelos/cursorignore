@@ -1,0 +1,9 @@
+# Copie para a raiz do projeto como .cursorignore: o agente deixa de indexar e ler o que só gasta contexto.
+node_modules/
+bin/
+obj/
+dist/
+.git/
+.time/*/archive/
+.time/AUDITORIA-arquivo-*.md
+.time/ESTADO-arquivo-*.md
